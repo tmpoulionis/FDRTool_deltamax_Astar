@@ -1,0 +1,37 @@
+BLOCK = {a,b,c,d,e,f};
+POS = BLOCK + {table,nil};
+BOOL = {0,1};
+ITEM = BLOCK+{nil};
+
+pos(a):POS;
+pos(b):POS;
+pos(c):POS;
+pos(d):POS;
+pos(e):POS;
+pos(f):POS;
+
+
+clear(a):BOOL;
+clear(b):BOOL;
+clear(c):BOOL;
+clear(d):BOOL;
+clear(e):BOOL;
+clear(f):BOOL;
+
+holding:ITEM;
+
+MoveFromTable(X:BLOCK, Y:BLOCK)
+pre:pos(X)=table, & clear(X)=1 & clear(Y)=1
+eff:pos(X)<-Y & clear(Y)<-0;
+
+MoveToTable(X:BLOCK, Y:BLOCK)
+pre:pos(X)=Y, & clear(X)=1
+eff:pos(X)<-table & clear(Y)<-1;
+
+Move(X:BLOCK, Y:BLOCK, Z:BLOCK)
+pre:pos(X)=Y, & clear(X)=1 & clear(Z)=1
+eff:pos(X)<-Z & clear(Y)<-1 & clear(Z)<-0;
+
+
+initial = {clear(a)<-1,clear(b)<-0,clear(c)<-0,clear(d)<-1,clear(e)<-0,clear(f)<-0, pos(a)<-b, pos(b)<-c, pos(c)<-table, pos(d)<-e, pos(e)<-f, pos(f)<-table};
+goals = {pos(f)<-a,pos(a)<-b, pos(d)<-e, pos(e)<-c};

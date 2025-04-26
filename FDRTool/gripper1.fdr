@@ -1,0 +1,40 @@
+ROOMS = {a,b,c,d};
+ROBOTS = {r};
+BALLS = {b1,b2};
+ITEMS = BALLS+{nil};
+GRIPPERS = {left,right};
+POSITIONS= ROOMS+GRIPPERS;
+
+loc(r):ROOMS;
+
+pos(b1): POSITIONS;
+pos(b2): POSITIONS;
+
+holding(left):ITEMS;
+holding(right):ITEMS;
+
+road(a,b);
+road(b,a);
+road(b,c);
+road(c,d);
+road(d,c);
+road(d,a);
+
+belongs(left,r);
+belongs(right,r);
+
+
+move(R:ROBOTS,X:ROOMS,Y:ROOMS)
+pre: loc(R)=X & road(X,Y)
+eff: loc(R)<-Y;
+
+pick(G:GRIPPERS, R:ROBOTS, B:BALLS, X:ROOMS)
+pre: belongs(G,R) & holding(G)=nil & loc(R)=X & pos(B)=X
+eff: holding(G) <-B & pos(B)<-G;
+
+drop(G:GRIPPERS, R:ROBOTS, B:BALLS, X:ROOMS)
+pre: belongs(G,R) & holding(G)=B & loc(R)=X & pos(B)=G
+eff: holding(G) <-nil & pos(B)<-X;
+
+initial = {loc(r)<-a, pos(b1)<-b, pos(b2)<-c, holding(left)<-nil, holding(right)<-nil};
+goals = {pos(b1)<-d, pos(b2)<-d};

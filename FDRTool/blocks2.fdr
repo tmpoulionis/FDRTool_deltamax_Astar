@@ -1,0 +1,37 @@
+BLOCK = {a,b,c,d,e};
+POS = BLOCK + {table,nil};
+BOOL = {0,1};
+ITEM = BLOCK+{nil};
+
+pos(a):POS;
+pos(b):POS;
+pos(c):POS;
+pos(d):POS;
+pos(e):POS;
+
+clear(a):BOOL;
+clear(b):BOOL;
+clear(c):BOOL;
+clear(d):BOOL;
+clear(e):BOOL;
+
+holding:ITEM;
+
+unstack(X:BLOCK,Y:BLOCK)
+pre: pos(X)=Y & clear(Y)=0 & clear(X)=1 & holding=nil
+eff: pos(X)<-nil & clear(X)<-0 & holding<-X & clear(Y)<-1;
+
+stack(X:BLOCK,Y:BLOCK)
+pre: clear(Y)=1 & clear(X)=0 & holding=X
+eff: pos(X)<-Y & clear(X)<-1 & holding<-nil & clear(Y)<-0;
+
+pickup(X:BLOCK)
+pre:pos(X)=table & clear(X)=1 & holding=nil
+eff: pos(X)<-nil & clear(X)<-0 & holding<-X;
+
+putdown(X:BLOCK)
+pre:holding=X
+eff: pos(X)<-table & clear(X)<-1 & holding<-nil;
+
+initial = {holding<-nil, clear(a)<-1,clear(b)<-0,clear(c)<-0,clear(d)<-1,clear(e)<-0, pos(a)<-b, pos(b)<-c, pos(c)<-table, pos(d)<-e, pos(e)<-table};
+goals = {pos(a)<-b, pos(d)<-e, pos(e)<-c};
