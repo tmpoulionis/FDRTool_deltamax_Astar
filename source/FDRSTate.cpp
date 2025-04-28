@@ -1,9 +1,9 @@
 #include "FDRSTate.h"
-#include <unordered_map>
 #include <limits>
 #include <set>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 using namespace std;
 
@@ -120,31 +120,26 @@ bool operator >= (pair<const FDRSTate s, bool b> s43,const FDRSTate s2)
 }
 */
 
-double FDRSTate::heuristic(State *goal) {
-    FDRSTate* goalState = dynamic_cast<FDRSTate*>(goal);
+int FDRSTate::HeuristicDeltaMax(const std::vector<Fact>& goal) {
 
-    unordered_map<Fact, double> deltaMax;
-    set<Fact> U;
+    unordered_map<string, int> deltaMax; // Like a python dictionary
+    set<string> U;
 
-    // Initialize all facts with deltaMax = 0
-    for(const Fact& fact : vars) {
-        deltaMax[fact] = 0;
-        U.insert(fact);
-    }
-
-    // Generate all facts for the problem
-    vector<Fact> allFacts;
-    for (const Fact& fact : vars) {
+    // Get all possible facts and initialize them to infinity
+    for (Fact& fact : vars) {
         Variable* var = fact.getVariable();
-        for (const Object& obj : var->getDomain().getObjects()) {
-            allFacts.emplace_back(var, &obj);
+        Domain domain = var->getDomain();
+        for (int i=0; i<domain.getSize(); i++) {
+            Object value = domain.getValue(i);
+            string fact_str = var->getName() + "=" + value.getDescription();
+            deltaMax[fact_str] = std::numeric_limits<int>::max();
         }
     }
 
-    for (const Fact& fact : allFacts) {
-        if (!deltaMax.count(fact)) {
-            deltaMax[fact] = std::numeric_limits<double>::infinity();
-        }
+    for (Fact& fact : vars) {
+        string fact_str = fact.toString();
+        deltaMax[fact_str] = 0;
+        U.insert(fact_str);
     }
     
     bool updated;
@@ -155,41 +150,51 @@ double FDRSTate::heuristic(State *goal) {
             auto allParams = action.isApplicable(rigids, vars);
             for (auto& params : allParams) {
                 GroundedAction ga(&action, params);
+                std::vector<Fact> preconditions = ga.getPreconditions();
 
                 // Check if preconditions are satisfied
-                bool preconditionsMet = true;
-                for (const Fact& pre : ga.getPreconditions()) {
-                    if(!U.count(pre)) {
-                        preconditionsMet = false;
+                bool precsMet = true;
+                int maxPreconditionCost = 0;
+                for (const Fact& prec : preconditions) {
+                    string precStr = prec.toString();
+                    if (!U.count(precStr)) {
+                        precsMet = false;
                         break;
                     }
+                    maxPreconditionCost = std::max(maxPreconditionCost, deltaMax[precStr]); // Find the most expensive precondition to execute this action
                 }
 
-                if (preconditionsMet) {
-                    double actionCost = 1;
-                    double maxPreconditionCost = 0;
+                if (precsMet) {
+                    int actionCost = action.getCost();
 
-                    // Find the most expensive precondition to execute this action
-                    for (const Fact& pre : ga.getPreconditions()) {
-                        maxPreconditionCost = std::max(maxPreconditionCost, deltaMax[pre]);
-                    }
+                    for (int i=0; i < ga.getEffectsCount(); i++) {
+                        Fact eff = ga.getEffect(i);
+                        string effStr = eff.toString();
 
-                    for (const Fact& eff : ga.getEffects()) {
-                        double newCost = actionCost + maxPreconditionCost;
-                        if (newCost > deltaMax[eff]) {
-                            deltaMax[eff] = newCost;
+                        int newCost = actionCost + maxPreconditionCost;
+
+                        if (!deltaMax.count(effStr)) {
+                            deltaMax[effStr] = std::numeric_limits<int>::max();
+                        }
+
+                        if (newCost < deltaMax[effStr]) {
+                            deltaMax[effStr] = newCost;
+                            U.insert(effStr);
                             updated = true;
                         }
-                        U.insert(eff);
                     }
                 } 
             }
         }
     } while (updated);
 
-    double maxCost = 0;
-    for (const Fact& goalFact : goalState->vars) {
-        maxCost = std::max(maxCost, deltaMax[goalFact]);
+    int maxCost = 0;
+    for (const Fact& goalFact : goal) {
+        string goalStr = goalFact.toString();
+        if (!deltaMax.count(goalStr)) {
+            return std::numeric_limits<int>::max(); // Unreachable
+        }
+        maxCost = std::max(maxCost, deltaMax[goalStr]);
     }
 
     return maxCost;

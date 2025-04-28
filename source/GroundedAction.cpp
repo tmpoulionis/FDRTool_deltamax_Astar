@@ -1,5 +1,5 @@
 #include "GroundedAction.h"
-
+#include "Precondition.h"
 using namespace std;
 
 
@@ -35,6 +35,28 @@ Fact GroundedAction::getEffect(int i)
 
     return f;
 }
+
+std::vector<Fact> GroundedAction::getPreconditions() {
+    std::vector<Fact> preconditions;
+
+    for (Precondition* prec : a->getPreconditions()) {
+        Fact fact;
+
+        fact.setVariable(prec->getVariable());
+        if(prec->isValueObject()) {
+            fact.setValue(new Object(prec->getValue()));
+        } else {
+            Parameter* valueParam = prec->getValueP();
+            int pos = a->getParameterPosition(valueParam->getName());
+            if(pos != -1 && pos < mypar.size()) {
+                fact.setValue(new Object(mypar[pos].getValue()));
+            } else {continue;}
+        }
+        preconditions.push_back(fact);
+    }
+    return preconditions;
+}
+
 string GroundedAction::toString()
 {
     string s;

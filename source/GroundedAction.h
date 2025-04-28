@@ -19,7 +19,7 @@ class GroundedAction
         int getEffectsCount() {return a->getEffectsCount();}
 
         Fact getEffect(int i);
-
+        std::vector<Fact> getPreconditions();
 
         string toString();
 
