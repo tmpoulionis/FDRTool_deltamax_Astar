@@ -19,7 +19,7 @@ class Action
         Parameter *getParameter (string);
         int getParameterPosition (string);
         bool addParameter(string);
-        int setCost(int c) {cost=c;}
+        void setCost(int c) {cost=c;}
         int getCost() {return cost;}
 
         int getEffectsCount () {return effects.size();}
