@@ -915,9 +915,21 @@ int main(int argc, char *argv[])
     long long mem =0;
 
     FDRSTate *init = new FDRSTate(actions,rigids,initial);
-    FDRSTate *goal =new FDRSTate(actions,rigids,goals);
+    FDRSTate *goal = new FDRSTate(actions,rigids,goals);
 
-    FDRSTate *r = BFS2(init,goal,examined,mem);
+    //FDRSTate *r = BFS2(init,goal,examined,mem);
+
+    cout << "Select algorithm: 1. BFS 2. A*";
+        int choice;
+    cin >> choice;
+
+    FDRSTate *r ;
+
+    if (choice == 1) {
+        r = BFS2(init,goal,examined,mem);
+    } else if (choice == 2) {
+        r = Astar(init, goal,examined,mem);
+    }
 
     finish= clock();
     duration = (double)(finish-start)/CLOCKS_PER_SEC;

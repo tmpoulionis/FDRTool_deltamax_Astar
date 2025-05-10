@@ -15,7 +15,7 @@ class FDRSTate: public State
         vector<GroundedAction> findForks();
         vector<FDRSTate *> expand ();
         int HeuristicDeltaMax(const std::vector<Fact>& goals);
-
+        double heuristic(State* goal) override;
         FDRSTate *getSuccessorState(GroundedAction);
 friend bool operator == (const FDRSTate, const FDRSTate);
 /*        bool operator == ( FDRSTate o)

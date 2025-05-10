@@ -141,7 +141,7 @@ int FDRSTate::HeuristicDeltaMax(const std::vector<Fact>& goal) {
         deltaMax[fact_str] = 0;
         U.insert(fact_str);
     }
-    
+
     bool updated;
     do {
         updated = false;
@@ -183,7 +183,7 @@ int FDRSTate::HeuristicDeltaMax(const std::vector<Fact>& goal) {
                             updated = true;
                         }
                     }
-                } 
+                }
             }
         }
     } while (updated);
@@ -198,4 +198,14 @@ int FDRSTate::HeuristicDeltaMax(const std::vector<Fact>& goal) {
     }
 
     return maxCost;
+}
+
+double FDRSTate::heuristic(State* goal) {
+
+    const FDRSTate* fdrGoal = dynamic_cast<const FDRSTate*>(goal);
+    if (!fdrGoal) {
+        return std::numeric_limits<double>::max(); // αποτυχία casting = μη υπολογίσιμο
+    }
+
+    return static_cast<double>(HeuristicDeltaMax(fdrGoal->vars));
 }
