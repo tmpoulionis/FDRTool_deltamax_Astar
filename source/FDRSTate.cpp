@@ -168,8 +168,19 @@ int FDRSTate::HeuristicDeltaMax(const std::vector<Fact>& goal) {
                     int actionCost = action.getCost();
 
                     for (int i=0; i < ga.getEffectsCount(); i++) {
+
+                            if (ga.getEffect(i).getVariable() == nullptr) {
+                                std::cerr << "[ERROR] Effect " << i << " has null variable pointer!" << std::endl;
+                            continue;
+                            }
+
                         Fact eff = ga.getEffect(i);
                         string effStr = eff.toString();
+
+                        if (!deltaMax.count(effStr)) {
+                            std::cerr << "[WARN] Skipping unknown effect: " << effStr << std::endl;
+                        continue;
+                        }
 
                         int newCost = actionCost + maxPreconditionCost;
 
@@ -200,12 +211,13 @@ int FDRSTate::HeuristicDeltaMax(const std::vector<Fact>& goal) {
     return maxCost;
 }
 
+
 double FDRSTate::heuristic(State* goal) {
 
     const FDRSTate* fdrGoal = dynamic_cast<const FDRSTate*>(goal);
     if (!fdrGoal) {
-        return std::numeric_limits<double>::max(); // αποτυχία casting = μη υπολογίσιμο
-    }
+        return std::numeric_limits<double>::max();
 
     return static_cast<double>(HeuristicDeltaMax(fdrGoal->vars));
+}
 }

@@ -919,7 +919,7 @@ int main(int argc, char *argv[])
 
     //FDRSTate *r = BFS2(init,goal,examined,mem);
 
-    cout << "Select algorithm: 1. BFS 2. A*";
+    cout << "Select algorithm (1 for BFS and 2 for A*): 1. BFS 2. A* ";
         int choice;
     cin >> choice;
 
